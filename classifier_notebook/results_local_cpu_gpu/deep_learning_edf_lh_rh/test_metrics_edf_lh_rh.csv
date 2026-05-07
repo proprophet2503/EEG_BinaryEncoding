@@ -1,0 +1,2 @@
+accuracy,balanced_accuracy,f1,roc_auc,cohen_kappa,best_val_bac,best_epoch,run_mode,device,n_train,n_val,n_test
+0.4895833333333333,0.4895833333333333,0.057692307692307696,0.4763997395833333,-0.02083333333333326,0.4930555555555556,1,smoke,cuda,432,144,192

@@ -1,0 +1,10 @@
+metric,value
+run_mode,smoke
+rows_before_filter,60000
+rows_after_filter,3575
+n_subjects_after_filter,150
+class_lh_count,1806
+class_rh_count,1769
+imbalance_ratio,1.0209157716223856
+significant_motor_pairs,0
+top_abs_corr,0.0669499727043349

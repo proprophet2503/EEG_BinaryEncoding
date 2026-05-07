@@ -1,0 +1,4 @@
+channel,subband,u_stat,p_value,significant
+Cz,Gamma,10367.5,0.4068300647248223,False
+C3,Gamma,11038.5,0.6378820894386803,False
+C4,Gamma,10141.5,0.6777095988848372,False

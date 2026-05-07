@@ -1,0 +1,208 @@
+Train samples: 118380, Test samples: 22242
+Epochs: 150, Learning Rate: 0.0003
+Class weights: [0.58596325 1.082239   1.2205707  1.1112272 ]
+Epoch   1/150 | Loss: 1.4508 | Train BAC: 0.2491, Kappa: -0.0012 | Test BAC: 0.2495, Kappa: -0.0010 | Best BAC: 0.2495
+Epoch  10/150 | Loss: 1.3350 | Train BAC: 0.3295, Kappa: 0.0870 | Test BAC: 0.3028, Kappa: 0.0552 | Best BAC: 0.3028
+Epoch  20/150 | Loss: 1.3279 | Train BAC: 0.3350, Kappa: 0.0934 | Test BAC: 0.2998, Kappa: 0.0512 | Best BAC: 0.3028
+Epoch  30/150 | Loss: 1.3333 | Train BAC: 0.3323, Kappa: 0.0912 | Test BAC: 0.3079, Kappa: 0.0596 | Best BAC: 0.3079
+Epoch  40/150 | Loss: 1.3395 | Train BAC: 0.3263, Kappa: 0.0839 | Test BAC: 0.3017, Kappa: 0.0539 | Best BAC: 0.3088
+Epoch  50/150 | Loss: 1.3454 | Train BAC: 0.3210, Kappa: 0.0771 | Test BAC: 0.3090, Kappa: 0.0599 | Best BAC: 0.3106
+Epoch  60/150 | Loss: 1.3504 | Train BAC: 0.3148, Kappa: 0.0696 | Test BAC: 0.3019, Kappa: 0.0523 | Best BAC: 0.3128
+Epoch  70/150 | Loss: 1.3556 | Train BAC: 0.3107, Kappa: 0.0657 | Test BAC: 0.3146, Kappa: 0.0648 | Best BAC: 0.3175
+Epoch  80/150 | Loss: 1.3590 | Train BAC: 0.3075, Kappa: 0.0619 | Test BAC: 0.3131, Kappa: 0.0636 | Best BAC: 0.3175
+Epoch  90/150 | Loss: 1.3634 | Train BAC: 0.3014, Kappa: 0.0553 | Test BAC: 0.3102, Kappa: 0.0604 | Best BAC: 0.3175
+
+Early stopping at epoch 99
+
+============================================================
+=== Final Results (Best Model) ===
+============================================================
+Accuracy:              25.74%
+Balanced Accuracy (BAC): 0.3123
+Cohen's Kappa:         0.0624
+Weighted F1 Score:     0.1758
+
+============================================================
+Classification Report:
+============================================================
+              precision    recall  f1-score   support
+
+   left_hand       0.41      0.04      0.07      8898
+  right_hand       0.25      0.70      0.37      4665
+        feet       0.25      0.49      0.33      4153
+        rest       0.24      0.03      0.05      4526
+
+    accuracy                           0.26     22242
+   macro avg       0.29      0.31      0.20     22242
+weighted avg       0.32      0.26      0.18     22242
+
+
+Confusion Matrix:
+[[ 322 5170 3251  155]
+ [ 130 3250 1198   87]
+ [ 174 1827 2038  114]
+ [ 151 2729 1531  115]]
+
+
+Saya sudah melakukan beberapa experiment untuk final project saya : Analisis Ekstraksi Fitur Sinyal EEG pada Pasien Amyotrophic Lateral Sclerosis (ALS) Menggunakan Dataset Publik EEGET-ALS.
+
+
+Untuk final project ini saya melakukan task motor imagery untuk klasifikasi ini quote dari paper referensi saya : 
+
+Moreover, a common and essential task in the field of EEG is the classification of motor imagery (MI). MI
+classification involves the interpretation of EEG signals to identify and distinguish patterns related to imagined
+movements or actions. This task has applications in brain-computer interfaces (BCIs) and assistive technol-
+ogies, where individuals can control devices or computers simply by thinking about specific motor actions.
+Accurate classification of motor imagery holds great promise in enhancing the quality of life for individuals with
+physical disabilities and advancing our understanding of brain function and control. To generate evaluation of
+MI classification on our dataset, 2 type of experiments settings which regarding to 2 parts in our datasets are
+conducted. This paper selected two classical algorithms (CSP26 and Euclidean Alignment - EA28) to enhance
+extracted informative features, and three machine learning or deep learning methods (SVM, EEG-ITNet29, and
+EEGNet30) for classification. Models are trained to predict 2 different sets of labels: 3 labels (LR0: lift left hand,
+lift right hand, resting) and 4 labels (LRF0: lift left hand, lift right hand, lift leg, resting). Performance of models
+are evaluated by 2 metrics: Balanced Accuracy (BAC) and Cohen’s Kappa (Kappa). The train/test separation for
+experiment of only healthy participants in our EEGET-ALS dataset13 is depicted in Fig. 8 and the corresponding
+MI classification results are presented in Table 4. The train/test separation for experiment of healthy and ALS
+participants in our EEGET-ALS dataset13 is illustrated in Fig. 9 and the corresponding MI classification results
+are presented in Table 5
+
+
+Pertama saya sudah melakukan tsne dan mencari kombinasi fitur yang jarak euclidean tsnenya paling tinggi. 
+Hasilnya ada di feature_separability_analysis.csv dan notebooknya di feature_visualization_tsne.ipynb
+
+Kemudian saya sudah coba training model SVM dengan semua kombinasi fitur yang ada dan mendapatkan hasilnya yang sudah disimpan di svm_experiment_results_improved.csv dan notebooknya di experiment_svm_v2.ipynb
+
+Kemudian terakhir saya juga sudah mencoba untuk training model menggunakan model EEGNet di eegnet-ver2.ipnb
+
+Berikut hasilnya : 
+
+Train samples: 118380, Test samples: 22242
+Epochs: 150, Learning Rate: 0.0003
+Class weights: [0.58596325 1.082239   1.2205707  1.1112272 ]
+Epoch   1/150 | Loss: 1.4508 | Train BAC: 0.2491, Kappa: -0.0012 | Test BAC: 0.2495, Kappa: -0.0010 | Best BAC: 0.2495
+Epoch  10/150 | Loss: 1.3350 | Train BAC: 0.3295, Kappa: 0.0870 | Test BAC: 0.3028, Kappa: 0.0552 | Best BAC: 0.3028
+Epoch  20/150 | Loss: 1.3279 | Train BAC: 0.3350, Kappa: 0.0934 | Test BAC: 0.2998, Kappa: 0.0512 | Best BAC: 0.3028
+Epoch  30/150 | Loss: 1.3333 | Train BAC: 0.3323, Kappa: 0.0912 | Test BAC: 0.3079, Kappa: 0.0596 | Best BAC: 0.3079
+Epoch  40/150 | Loss: 1.3395 | Train BAC: 0.3263, Kappa: 0.0839 | Test BAC: 0.3017, Kappa: 0.0539 | Best BAC: 0.3088
+Epoch  50/150 | Loss: 1.3454 | Train BAC: 0.3210, Kappa: 0.0771 | Test BAC: 0.3090, Kappa: 0.0599 | Best BAC: 0.3106
+Epoch  60/150 | Loss: 1.3504 | Train BAC: 0.3148, Kappa: 0.0696 | Test BAC: 0.3019, Kappa: 0.0523 | Best BAC: 0.3128
+Epoch  70/150 | Loss: 1.3556 | Train BAC: 0.3107, Kappa: 0.0657 | Test BAC: 0.3146, Kappa: 0.0648 | Best BAC: 0.3175
+Epoch  80/150 | Loss: 1.3590 | Train BAC: 0.3075, Kappa: 0.0619 | Test BAC: 0.3131, Kappa: 0.0636 | Best BAC: 0.3175
+Epoch  90/150 | Loss: 1.3634 | Train BAC: 0.3014, Kappa: 0.0553 | Test BAC: 0.3102, Kappa: 0.0604 | Best BAC: 0.3175
+
+Early stopping at epoch 99
+
+============================================================
+=== Final Results (Best Model) ===
+============================================================
+Accuracy:              25.74%
+Balanced Accuracy (BAC): 0.3123
+Cohen's Kappa:         0.0624
+Weighted F1 Score:     0.1758
+
+============================================================
+Classification Report:
+============================================================
+              precision    recall  f1-score   support
+
+   left_hand       0.41      0.04      0.07      8898
+  right_hand       0.25      0.70      0.37      4665
+        feet       0.25      0.49      0.33      4153
+        rest       0.24      0.03      0.05      4526
+
+    accuracy                           0.26     22242
+   macro avg       0.29      0.31      0.20     22242
+weighted avg       0.32      0.26      0.18     22242
+
+
+Confusion Matrix:
+[[ 322 5170 3251  155]
+ [ 130 3250 1198   87]
+ [ 174 1827 2038  114]
+ [ 151 2729 1531  115]]
+
+
+Saya ingin anda membuatkan latex
+
+Saya sudah melakukan beberapa experiment untuk final project saya : Analisis Ekstraksi Fitur Sinyal EEG pada Pasien Amyotrophic Lateral Sclerosis (ALS) Menggunakan Dataset Publik EEGET-ALS.
+
+
+Untuk final project ini saya melakukan task motor imagery untuk klasifikasi ini quote dari paper referensi saya : 
+
+Moreover, a common and essential task in the field of EEG is the classification of motor imagery (MI). MI
+classification involves the interpretation of EEG signals to identify and distinguish patterns related to imagined
+movements or actions. This task has applications in brain-computer interfaces (BCIs) and assistive technol-
+ogies, where individuals can control devices or computers simply by thinking about specific motor actions.
+Accurate classification of motor imagery holds great promise in enhancing the quality of life for individuals with
+physical disabilities and advancing our understanding of brain function and control. To generate evaluation of
+MI classification on our dataset, 2 type of experiments settings which regarding to 2 parts in our datasets are
+conducted. This paper selected two classical algorithms (CSP26 and Euclidean Alignment - EA28) to enhance
+extracted informative features, and three machine learning or deep learning methods (SVM, EEG-ITNet29, and
+EEGNet30) for classification. Models are trained to predict 2 different sets of labels: 3 labels (LR0: lift left hand,
+lift right hand, resting) and 4 labels (LRF0: lift left hand, lift right hand, lift leg, resting). Performance of models
+are evaluated by 2 metrics: Balanced Accuracy (BAC) and Cohen’s Kappa (Kappa). The train/test separation for
+experiment of only healthy participants in our EEGET-ALS dataset13 is depicted in Fig. 8 and the corresponding
+MI classification results are presented in Table 4. The train/test separation for experiment of healthy and ALS
+participants in our EEGET-ALS dataset13 is illustrated in Fig. 9 and the corresponding MI classification results
+are presented in Table 5
+
+
+Pertama saya sudah melakukan tsne dan mencari kombinasi fitur yang jarak euclidean tsnenya paling tinggi. 
+Hasilnya ada di feature_separability_analysis.csv dan notebooknya di feature_visualization_tsne.ipynb
+
+Kemudian saya sudah coba training model SVM dengan semua kombinasi fitur yang ada dan mendapatkan hasilnya yang sudah disimpan di svm_experiment_results_improved.csv dan notebooknya di experiment_svm_v2.ipynb
+
+Kemudian terakhir saya juga sudah mencoba untuk training model menggunakan model EEGNet di eegnet-ver2.ipnb
+
+Berikut hasilnya : 
+
+Train samples: 118380, Test samples: 22242
+Epochs: 150, Learning Rate: 0.0003
+Class weights: [0.58596325 1.082239   1.2205707  1.1112272 ]
+Epoch   1/150 | Loss: 1.4508 | Train BAC: 0.2491, Kappa: -0.0012 | Test BAC: 0.2495, Kappa: -0.0010 | Best BAC: 0.2495
+Epoch  10/150 | Loss: 1.3350 | Train BAC: 0.3295, Kappa: 0.0870 | Test BAC: 0.3028, Kappa: 0.0552 | Best BAC: 0.3028
+Epoch  20/150 | Loss: 1.3279 | Train BAC: 0.3350, Kappa: 0.0934 | Test BAC: 0.2998, Kappa: 0.0512 | Best BAC: 0.3028
+Epoch  30/150 | Loss: 1.3333 | Train BAC: 0.3323, Kappa: 0.0912 | Test BAC: 0.3079, Kappa: 0.0596 | Best BAC: 0.3079
+Epoch  40/150 | Loss: 1.3395 | Train BAC: 0.3263, Kappa: 0.0839 | Test BAC: 0.3017, Kappa: 0.0539 | Best BAC: 0.3088
+Epoch  50/150 | Loss: 1.3454 | Train BAC: 0.3210, Kappa: 0.0771 | Test BAC: 0.3090, Kappa: 0.0599 | Best BAC: 0.3106
+Epoch  60/150 | Loss: 1.3504 | Train BAC: 0.3148, Kappa: 0.0696 | Test BAC: 0.3019, Kappa: 0.0523 | Best BAC: 0.3128
+Epoch  70/150 | Loss: 1.3556 | Train BAC: 0.3107, Kappa: 0.0657 | Test BAC: 0.3146, Kappa: 0.0648 | Best BAC: 0.3175
+Epoch  80/150 | Loss: 1.3590 | Train BAC: 0.3075, Kappa: 0.0619 | Test BAC: 0.3131, Kappa: 0.0636 | Best BAC: 0.3175
+Epoch  90/150 | Loss: 1.3634 | Train BAC: 0.3014, Kappa: 0.0553 | Test BAC: 0.3102, Kappa: 0.0604 | Best BAC: 0.3175
+
+Early stopping at epoch 99
+
+============================================================
+=== Final Results (Best Model) ===
+============================================================
+Accuracy:              25.74%
+Balanced Accuracy (BAC): 0.3123
+Cohen's Kappa:         0.0624
+Weighted F1 Score:     0.1758
+
+============================================================
+Classification Report:
+============================================================
+              precision    recall  f1-score   support
+
+   left_hand       0.41      0.04      0.07      8898
+  right_hand       0.25      0.70      0.37      4665
+        feet       0.25      0.49      0.33      4153
+        rest       0.24      0.03      0.05      4526
+
+    accuracy                           0.26     22242
+   macro avg       0.29      0.31      0.20     22242
+weighted avg       0.32      0.26      0.18     22242
+
+
+Confusion Matrix:
+[[ 322 5170 3251  155]
+ [ 130 3250 1198   87]
+ [ 174 1827 2038  114]
+ [ 151 2729 1531  115]]
+
+
+Saya ingin anda membuatkan paper dari abstract, introduction, related work (just make it blank i will do it by myself), methodology (here explain the data preprocessing from the notebooks and also the feature extractions and the combinations  (detail process and parameters). Then explained the TSNE method and distance, SVM method : train all feature extraction combination, and also EEGNET method without feature extraction). Then make the results and discussion first about the TSNE and distance results, then the SVM then the EEG NET. Compare the results between feature extracted manually by SVM and also automatically by EEGNET. Make the paper in english. 
+
+
+

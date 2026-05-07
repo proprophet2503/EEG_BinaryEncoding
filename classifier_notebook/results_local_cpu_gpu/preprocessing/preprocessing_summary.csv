@@ -1,0 +1,10 @@
+metric,value
+run_mode,smoke
+raw_rows,120000
+filtered_rows,1723
+wide_rows,300
+wide_columns,33
+n_subjects,150
+class_lh,150
+class_rh,150
+n_numeric_features,27

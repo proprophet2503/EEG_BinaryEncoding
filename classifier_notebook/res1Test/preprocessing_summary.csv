@@ -1,0 +1,9 @@
+metric,value
+n_samples,300
+n_features,3
+n_LH,150
+n_RH,150
+n_subjects,150
+n_tasks,1
+channels_used,"['C3', 'Cz', 'C4']"
+subbands_used,['Gamma']

@@ -1,0 +1,27 @@
+Steps : 
+
+0. Mempelajari data secara metadata, timestamp, datanya sendiri, alat pengambil data, kualitas data, task dan scenario (beserta timing timestamp)
+
+1. Bisa mengubah EDF ke csv + pisah csv per task (termasuk resting dan baseline)              ( karena memudahkan untuk python )
+* ada CSV full dan csv per task
+
+
+2. Preprocessing : dari raw ke clean raw ke bandpass ke notch ke ASR ke ICA filter dan diakhiri subband decomposition
+* bisa jadi subband decomposition pada masing-masing preprocessing tergantung kesepakatan atau proses eksperimen
+* bisa jadi ASR ga penting 
+* bisa jadi klasifikasi sudah ditemukan dari ICA filter (muscle movement)
+* clean raw (data kosong, hilang, landai) --> ada hubungan dengan kualitas data (bisa jadi raw sudah clean raw)
+ 
+3. Chunking : Data dibagi-bagi sesuai kesepakatan (karena sampling frequency 128 hz, maka chunk dibagi based on 2^x , bisa 2 detik juga digabung   )
+* chunking ngaruh ke step 0 
+
+4. Feature Extraction:  
+
+5. Encoding : encoding dari naik turun data, ketika data naik dinilai 1, ketika sama atau turun dinilai 0 
+* Misal sebelum 100 ke 101 maka encodenya 1 dan sebaliknya
+* output data binary (sequential) --> yang mungkin akan difokuskan
+* bisa jadi tanpa feature extraction dan chunking langsung encoding  
+
+6. Analisa Data : Dari encoding bisa langsung analisa data (bisa jadi susah)
+
+7. Classifier 

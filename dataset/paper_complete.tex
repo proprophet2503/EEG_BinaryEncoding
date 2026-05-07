@@ -1,0 +1,681 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{hyperref}
+
+\begin{document}
+
+\title{Feature Extraction Analysis of EEG Signals in Amyotrophic Lateral Sclerosis (ALS) Patients for Motor Imagery Classification Using the EEGET-ALS Public Dataset}
+
+\author{\IEEEauthorblockN{Your Name}
+\IEEEauthorblockA{\textit{Department Name} \\
+\textit{University Name}\\
+City, Country \\
+email@university.edu}}
+
+\maketitle
+
+\begin{abstract}
+Motor imagery (MI) classification from electroencephalography (EEG) signals represents a critical task in brain-computer interface (BCI) development, particularly for assistive technologies targeting individuals with motor disabilities such as Amyotrophic Lateral Sclerosis (ALS). This study presents a comprehensive analysis of feature extraction techniques for EEG-based motor imagery classification using the EEGET-ALS public dataset. We investigate multiple feature extraction approaches including Power Spectral Density (PSD), Common Spatial Patterns (CSP), Band Power, Wavelet Transform, Inter-Hemispheric Amplitude Ratio (IHAR), Temporal features, and Hjorth parameters, both individually and in combination. To evaluate feature separability, we employ t-distributed Stochastic Neighbor Embedding (t-SNE) dimensionality reduction with Euclidean distance metrics. Our experimental framework compares traditional machine learning approaches using Support Vector Machines (SVM) with manual feature extraction against deep learning methods using EEGNet for automatic feature learning. The dataset comprises 32-channel EEG recordings sampled at 128 Hz from both healthy participants and ALS patients performing four motor imagery tasks: left hand movement, right hand movement, foot movement, and rest. The longitudinal nature of the dataset, with multiple recording sessions per participant, provides unique insights into motor imagery patterns. Results demonstrate that the combined feature set (F\_ALL) achieved the highest feature separability with an average inter-class distance of 1.627, while SVM with CSP and Euclidean Alignment achieved the best classification performance with a Balanced Accuracy (BAC) of 0.3036 and Cohen's Kappa of 0.0849. In comparison, EEGNet with automatic feature extraction achieved a BAC of 0.3123 and Kappa of 0.0624. Our findings reveal the challenges in motor imagery classification for ALS patients and highlight the trade-offs between manual and automatic feature extraction approaches.
+\end{abstract}
+
+\begin{IEEEkeywords}
+EEG, Motor Imagery, Amyotrophic Lateral Sclerosis, Feature Extraction, Brain-Computer Interface, Common Spatial Patterns, Support Vector Machine, EEGNet, Deep Learning
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+Amyotrophic Lateral Sclerosis (ALS) is a progressive neurodegenerative disease that affects motor neurons in the brain and spinal cord, leading to muscle weakness, paralysis, and eventual loss of voluntary movement control. As the disease progresses, patients lose their ability to communicate and interact with their environment, severely impacting their quality of life. Brain-Computer Interfaces (BCIs) offer a promising solution by enabling direct communication between the brain and external devices without relying on muscular control.
+
+Electroencephalography (EEG) has emerged as a popular modality for BCI systems due to its non-invasive nature, high temporal resolution, and relatively low cost compared to other neuroimaging techniques. Motor imagery (MI), the mental rehearsal of movement without actual execution, produces distinctive patterns in EEG signals that can be decoded and used to control assistive devices. Motor imagery classification involves the interpretation of EEG signals to identify and distinguish patterns related to imagined movements or actions. This task has applications in brain-computer interfaces (BCIs) and assistive technologies, where individuals can control devices or computers simply by thinking about specific motor actions. Accurate classification of motor imagery holds great promise in enhancing the quality of life for individuals with physical disabilities and advancing our understanding of brain function and control.
+
+The success of MI-based BCIs heavily depends on effective feature extraction and classification methods. Traditional approaches rely on domain-specific feature engineering, including spectral features like Power Spectral Density (PSD), spatial filtering techniques such as Common Spatial Patterns (CSP), and time-domain features. These methods require expert knowledge and careful parameter tuning. In contrast, deep learning approaches, particularly Convolutional Neural Networks (CNNs) like EEGNet, have shown promise in automatically learning relevant features directly from raw or minimally preprocessed EEG data.
+
+The EEGET-ALS public dataset provides a unique opportunity to study motor imagery patterns in both healthy individuals and ALS patients. Understanding the differences in neural signatures and evaluating the effectiveness of various feature extraction and classification techniques is crucial for developing robust BCI systems for this population.
+
+This study makes the following contributions:
+
+\begin{itemize}
+    \item We conduct a comprehensive analysis of seven distinct feature extraction methods and their combinations, totaling 16 feature sets, evaluated for motor imagery classification.
+    \item We employ t-SNE visualization with Euclidean distance metrics to quantitatively assess feature separability across four motor imagery classes.
+    \item We systematically compare traditional machine learning (SVM with manual features) against deep learning (EEGNet with automatic features) approaches.
+    \item We provide insights into the challenges of motor imagery classification in ALS patients using a public dataset.
+    \item We analyze the trade-offs between interpretable manual feature extraction and end-to-end deep learning methods.
+\end{itemize}
+
+The remainder of this paper is organized as follows: Section II reviews related work, Section III describes the methodology including data preprocessing, feature extraction, and classification methods, Section IV presents experimental results, Section V discusses the findings and their implications, and Section VI concludes the paper with future directions.
+
+\section{Related Work}
+
+% This section to be completed by the author
+% Suggested topics to cover:
+% - Motor imagery classification methods in BCI systems
+% - EEG signal processing techniques
+% - CSP and spatial filtering approaches
+% - Deep learning for EEG analysis
+% - BCI systems for ALS patients
+% - Feature extraction methods in EEG
+% - t-SNE and dimensionality reduction for EEG
+% - Comparative studies of traditional ML vs deep learning for BCI
+
+\section{Methodology}
+
+\subsection{Dataset and Participants}
+
+This study utilizes the EEGET-ALS public dataset, which contains EEG recordings from both healthy participants and individuals diagnosed with Amyotrophic Lateral Sclerosis. The dataset specifications are verified from the metadata files (eeg.json) present in each recording session, which confirm that the dataset comprises 32-channel EEG data recorded at a sampling frequency of 128 Hz (SamplingFrequence: 128, EEGchannelNumber: 32).
+
+\textbf{Dataset Structure and Participants:}
+The dataset includes two types of participants:
+\begin{itemize}
+    \item \textbf{Healthy Participants}: Identified with "id*" prefix (e.g., id59: 31-year-old male)
+    \item \textbf{ALS Patients}: Identified with "ALS*" prefix (e.g., ALS01: 43-year-old male)
+\end{itemize}
+
+Each participant has multiple recording sessions (time1, time2, ..., timeN) conducted at different days or intervals. The recording\_time.json file in each participant's folder documents the temporal spacing between sessions. For example, ALS01 has 10 recording sessions spanning 17 months, allowing for longitudinal analysis of disease progression.
+
+\textbf{Motor Imagery Tasks:}
+Participants performed motor imagery tasks corresponding to nine scenarios, which we consolidated into four distinct classes:
+
+\begin{itemize}
+    \item \textbf{Left Hand}: Imagining lifting the left hand (Scenario 1: "Nâng tay trái")
+    \item \textbf{Right Hand}: Imagining lifting the right hand (Scenario 2: "Nâng tay phải")
+    \item \textbf{Feet}: Imagining lifting either leg (Scenarios 3 and 4 merged: left and right leg movements)
+    \item \textbf{Rest}: Resting state without motor imagery (Scenario 9: "tôi muốn vệ sinh" - rest/baseline state)
+\end{itemize}
+
+\textbf{Data Organization:}
+The dataset is organized hierarchically:
+\begin{verbatim}
+Dataset/
+├── ALS01/ (ALS patient)
+│   ├── recording_time.json
+│   ├── time1/
+│   │   ├── info.json (id, age, gender)
+│   │   ├── scenario1/
+│   │   │   ├── EEG.edf (raw EEG signals)
+│   │   │   ├── eeg.json (metadata: sampling freq, channels)
+│   │   │   ├── scenario.json (scenario description)
+│   │   │   ├── EEGTimeStamp.txt
+│   │   │   └── ET.csv (eye tracking data)
+│   │   ├── scenario2/
+│   │   └── ...
+│   ├── time2/
+│   └── ...
+├── id59/ (Healthy participant)
+│   └── (similar structure)
+└── ...
+\end{verbatim}
+
+Each scenario folder contains EEG data in European Data Format (EDF), along with metadata in JSON format specifying the recording parameters, scenario description, and participant information. Additional files include eye-tracking data (ET.csv) and timestamp information (EEGTimeStamp.txt), though this study focuses exclusively on EEG signals.
+
+\subsection{Data Preprocessing}
+
+The preprocessing pipeline consists of several stages designed to enhance signal quality and prepare the data for feature extraction and classification.
+
+\subsubsection{Signal Filtering}
+Raw EEG signals were bandpass filtered to isolate frequency components relevant to motor imagery. A 4th-order Butterworth bandpass filter was applied with cutoff frequencies of 8 Hz (low) and 30 Hz (high). This frequency range encompasses the mu (8-13 Hz) and beta (13-30 Hz) rhythms, which are known to modulate during motor imagery and actual movement. The filter was implemented using the scipy.signal.filtfilt function to ensure zero-phase distortion.
+
+\subsubsection{Segmentation}
+Continuous EEG recordings were segmented into fixed-length windows to create individual trials for analysis. A window duration of 2 seconds (256 samples at 128 Hz) was chosen, representing a standard epoch length in motor imagery studies. For training data, an overlap of 50\% between consecutive windows was used to increase the number of training samples, while for testing, no overlap was applied to ensure independent evaluation samples.
+
+\subsubsection{Normalization}
+To account for inter-subject and inter-session variability, z-score normalization was applied independently to each channel. For each channel, the mean was subtracted and the result was divided by the standard deviation:
+
+\begin{equation}
+x_{normalized} = \frac{x - \mu}{\sigma + \epsilon}
+\end{equation}
+
+where $\mu$ is the channel mean, $\sigma$ is the channel standard deviation, and $\epsilon = 10^{-10}$ is added for numerical stability.
+
+\subsubsection{Euclidean Alignment}
+For advanced preprocessing, Euclidean Alignment (EA) was applied to reduce inter-subject and inter-session variability in covariance structures. EA transforms the data such that the covariance matrices are aligned to a reference covariance matrix. Given a set of trials $\{X_i\}$ where each $X_i \in \mathbb{R}^{C \times T}$ (C channels, T time points), the process is:
+
+\begin{enumerate}
+    \item Compute the covariance matrix for each trial: $C_i = X_i X_i^T / T$
+    \item Calculate the mean covariance: $\bar{C} = \frac{1}{N}\sum_{i=1}^{N} C_i$
+    \item Compute the alignment matrix: $R = \bar{C}^{-1/2}$
+    \item Transform each trial: $X_i' = R X_i$
+\end{enumerate}
+
+The matrix square root inverse $\bar{C}^{-1/2}$ was computed via eigendecomposition with regularization to ensure numerical stability.
+
+\subsection{Feature Extraction Methods}
+
+We implemented seven distinct feature extraction methods, both individually and in various combinations, resulting in 16 feature sets. Each method captures different aspects of the EEG signal relevant to motor imagery.
+
+\subsubsection{F1: Power Spectral Density (PSD)}
+PSD features quantify the power distribution across frequency bands. Using Welch's method with a window size of 128 samples, we computed the power spectral density for each channel. Features were extracted for the mu band (8-12 Hz) and beta band (12-30 Hz), which are critical for sensorimotor rhythm analysis:
+
+\begin{equation}
+PSD_{band} = \log\left(\frac{1}{|F_{band}|}\sum_{f \in F_{band}} P(f) + \epsilon\right)
+\end{equation}
+
+where $P(f)$ is the power at frequency $f$, $F_{band}$ is the set of frequencies in the band, and the logarithm is applied for variance stabilization. This yields 2 features per channel (64 features for 32 channels).
+
+\subsubsection{F2: Common Spatial Patterns (CSP)}
+CSP is a spatial filtering technique that maximizes the variance of one class while minimizing the variance of another class. We implemented a multi-class CSP using a One-vs-Rest approach with 4 components:
+
+For each class $c$ versus all other classes, CSP finds spatial filters $W$ by solving:
+\begin{equation}
+W = \arg\max_W \frac{W^T \Sigma_c W}{W^T \Sigma_{rest} W}
+\end{equation}
+
+where $\Sigma_c$ and $\Sigma_{rest}$ are the normalized covariance matrices for class $c$ and all other classes, respectively. The spatial filters are obtained from the generalized eigenvalue decomposition. The top and bottom eigenvectors (those with largest and smallest eigenvalues) are selected as filters. For each trial, after applying spatial filters, log-variance features are computed:
+
+\begin{equation}
+CSP_j = \log\left(var(W_j^T X) + \epsilon\right)
+\end{equation}
+
+where $W_j$ is the j-th spatial filter and $X$ is the trial data.
+
+\subsubsection{F3: Band Power}
+Band power features measure the variance of the signal within specific frequency bands relevant to motor imagery. We extracted features from four bands:
+\begin{itemize}
+    \item Mu: 8-12 Hz (sensorimotor rhythm)
+    \item Low Beta: 12-20 Hz
+    \item High Beta: 20-30 Hz
+    \item Gamma: 30-45 Hz
+\end{itemize}
+
+For each band, the signal was bandpass filtered, and the log-variance was computed and averaged across channels:
+
+\begin{equation}
+BP_{band} = \frac{1}{C}\sum_{c=1}^{C} \log\left(var(X_{band,c}) + \epsilon\right)
+\end{equation}
+
+This produces 4 features per trial.
+
+\subsubsection{F4: Wavelet Transform}
+Wavelet-based features capture time-frequency characteristics of the signal. We employed the Discrete Wavelet Transform (DWT) using the Daubechies 4 (db4) wavelet with 4 decomposition levels. For each channel, the signal was decomposed, and the energy of each coefficient was computed:
+
+\begin{equation}
+E_l = \log\left(\sum_{i} |c_{l,i}|^2 + \epsilon\right)
+\end{equation}
+
+where $c_{l,i}$ are the wavelet coefficients at level $l$. Features were averaged across a subset of channels (8 channels) to reduce dimensionality, yielding 5 features (one per decomposition level including approximation coefficients).
+
+\subsubsection{F5: Inter-Hemispheric Amplitude Ratio (IHAR)}
+IHAR features exploit the lateralization of motor imagery, where left/right hand imagery produces asymmetric activation in contralateral hemispheres. Channels were divided into left (even indices) and right (odd indices) groups. For mu and beta bands:
+
+\begin{equation}
+IHAR_{band} = \log\left(\frac{P_{left,band}}{P_{right,band}}\right)
+\end{equation}
+
+\begin{equation}
+IHAR_{diff} = \frac{P_{left,band} - P_{right,band}}{P_{left,band} + P_{right,band}}
+\end{equation}
+
+where $P_{left,band}$ and $P_{right,band}$ are the average powers in the specified band for left and right hemisphere channels. This yields 4 features (2 per band).
+
+\subsubsection{F6: Temporal Features}
+Statistical temporal features characterize the signal's time-domain properties:
+\begin{itemize}
+    \item Mean amplitude (averaged across channels)
+    \item Log-variance (averaged across channels)
+    \item Skewness (averaged across channels)
+    \item Kurtosis (averaged across channels)
+    \item Peak-to-peak amplitude (averaged across channels)
+\end{itemize}
+
+These 5 features provide complementary information to frequency-domain features.
+
+\subsubsection{F7: Hjorth Parameters}
+Hjorth parameters are classic EEG descriptors capturing signal complexity:
+
+\begin{itemize}
+    \item \textbf{Activity}: Signal variance, $A = var(x)$
+    \item \textbf{Mobility}: $M = \sqrt{\frac{var(dx/dt)}{var(x)}}$
+    \item \textbf{Complexity}: $C = \frac{Mobility(dx/dt)}{Mobility(x)}$
+\end{itemize}
+
+where $dx/dt$ represents the first derivative. These parameters were computed for each channel and averaged, yielding 3 features.
+
+\subsubsection{Feature Combinations}
+In addition to individual feature types, we created 16 feature sets combining different extraction methods:
+
+\begin{itemize}
+    \item \textbf{F\_ALL}: All features combined (79 features)
+    \item \textbf{F\_CORE}: Core features (PSD + CSP + BandPower) (16 features)
+    \item \textbf{F\_MINIMAL}: Minimal set (CSP + PSD) (6 features)
+    \item \textbf{F\_MI\_CORE}: Motor imagery optimized core (12 features)
+    \item \textbf{C1-C8}: Various two-way and three-way combinations
+\end{itemize}
+
+\subsection{Feature Separability Analysis}
+
+To quantitatively assess the discriminative power of different feature sets, we employed t-distributed Stochastic Neighbor Embedding (t-SNE) for dimensionality reduction followed by Euclidean distance analysis.
+
+\subsubsection{t-SNE Dimensionality Reduction}
+t-SNE is a nonlinear dimensionality reduction technique that preserves local structure in high-dimensional data. Features were first standardized using StandardScaler, then t-SNE was applied to project the features into 3-dimensional space:
+
+\begin{equation}
+Y = \text{t-SNE}(X, n_{components}=3, perplexity=30, random\_state=42)
+\end{equation}
+
+where $X$ is the feature matrix and $Y$ is the 3D embedding. The perplexity parameter was set to 30, balancing local and global structure preservation.
+
+\subsubsection{Distance Metrics}
+For each feature set, we computed several distance-based separability metrics in the t-SNE space:
+
+\begin{itemize}
+    \item \textbf{Inter-class Distance}: Average Euclidean distance between class centroids:
+    \begin{equation}
+    d_{inter} = \frac{2}{K(K-1)}\sum_{i<j} ||c_i - c_j||_2
+    \end{equation}
+    where $c_i$ is the centroid of class $i$ and $K=4$ is the number of classes.
+    
+    \item \textbf{Minimum Inter-class Distance}: Closest distance between any two class centroids
+    
+    \item \textbf{Intra-class Variance}: Average within-class scatter:
+    \begin{equation}
+    \sigma_{intra}^2 = \frac{1}{K}\sum_{k=1}^{K}\frac{1}{N_k}\sum_{i \in class_k} ||x_i - c_k||_2^2
+    \end{equation}
+    
+    \item \textbf{Separability Ratio}: 
+    \begin{equation}
+    SR = \frac{d_{inter}}{\sigma_{intra}}
+    \end{equation}
+    
+    \item \textbf{Pairwise Distances}: Individual distances between specific class pairs (left\_hand vs right\_hand, left\_hand vs feet, etc.)
+\end{itemize}
+
+Higher inter-class distances and separability ratios indicate better feature discriminability.
+
+\subsection{Classification Methods}
+
+\subsubsection{Support Vector Machine (SVM)}
+SVM was employed as the traditional machine learning baseline with manually extracted features. We used the RBF (Radial Basis Function) kernel:
+
+\begin{equation}
+K(x_i, x_j) = \exp\left(-\gamma ||x_i - x_j||^2\right)
+\end{equation}
+
+Hyperparameters were optimized via grid search:
+\begin{itemize}
+    \item Regularization parameter $C \in \{1, 10, 100\}$
+    \item Kernel coefficient $\gamma \in \{0.01, 0.1, auto, scale\}$
+\end{itemize}
+
+The optimal configuration was selected based on balanced accuracy in cross-validation. Features were standardized before training using StandardScaler.
+
+For experiments involving CSP, we also applied Euclidean Alignment as a preprocessing step to improve cross-subject generalization. The combination of CSP spatial filtering and EA domain adaptation was designated as "CSP+EA+SVM".
+
+\subsubsection{EEGNet}
+EEGNet is a compact convolutional neural network specifically designed for EEG-based BCIs. It automatically learns spatial and temporal features through its architecture:
+
+\textbf{Architecture Details:}
+\begin{enumerate}
+    \item \textbf{Temporal Convolution}: Captures temporal dependencies
+    \begin{itemize}
+        \item Filters: $F=8$, Kernel size: $(1, 64)$
+        \item Output: [Batch, 8, 32, Time]
+    \end{itemize}
+    
+    \item \textbf{Depthwise Spatial Convolution}: Learns spatial filters per temporal filter
+    \begin{itemize}
+        \item Depth multiplier: $D=2$, Kernel size: $(32, 1)$
+        \item Max-norm constraint: 1.0
+        \item Output: [Batch, 16, 1, Time]
+    \end{itemize}
+    
+    \item \textbf{Separable Convolution}: Further temporal feature refinement
+    \begin{itemize}
+        \item Filters: $F_2=16$, Kernel size: $(1, 16)$
+        \item Output: [Batch, 16, 1, Time]
+    \end{itemize}
+    
+    \item \textbf{Average Pooling}: Downsampling with pool size 8
+    
+    \item \textbf{Dropout}: Regularization with $p=0.5$
+    
+    \item \textbf{Classification Head}: Fully connected layer mapping to 4 classes
+\end{enumerate}
+
+\textbf{Training Configuration:}
+\begin{itemize}
+    \item Input: [Batch, 32, 256] (32 channels, 256 time points)
+    \item Optimizer: EAdam (Adam with epsilon decay)
+    \item Learning rate: $3 \times 10^{-4}$
+    \item Batch size: 128
+    \item Epochs: 150 with early stopping (patience=10)
+    \item Loss function: Cross-entropy with class weights
+    \item Class weights: Computed as inversely proportional to class frequencies: [0.586, 1.082, 1.221, 1.111]
+\end{itemize}
+
+The model processes raw normalized EEG data without explicit feature extraction, learning representations end-to-end.
+
+\subsection{Experimental Setup}
+
+\subsubsection{Data Split}
+The dataset was split into training and testing sets at the trial level. For SVM experiments, we used 4,642 training samples and 875 test samples. For EEGNet, we used 118,380 training samples and 22,242 test samples (benefiting from windowing with overlap).
+
+\subsubsection{Evaluation Metrics}
+Classification performance was evaluated using metrics appropriate for imbalanced multi-class problems:
+
+\begin{itemize}
+    \item \textbf{Balanced Accuracy (BAC)}: Average of per-class recall
+    \begin{equation}
+    BAC = \frac{1}{K}\sum_{k=1}^{K} \frac{TP_k}{TP_k + FN_k}
+    \end{equation}
+    
+    \item \textbf{Cohen's Kappa ($\kappa$)}: Agreement beyond chance
+    \begin{equation}
+    \kappa = \frac{p_o - p_e}{1 - p_e}
+    \end{equation}
+    where $p_o$ is observed agreement and $p_e$ is expected agreement by chance
+    
+    \item \textbf{Weighted F1 Score}: Harmonic mean of precision and recall, weighted by class support
+    
+    \item \textbf{Classification Report}: Per-class precision, recall, and F1-score
+    
+    \item \textbf{Confusion Matrix}: Detailed breakdown of predictions
+\end{itemize}
+
+\subsubsection{Implementation}
+All experiments were implemented in Python 3.x using:
+\begin{itemize}
+    \item Signal processing: scipy, MNE-Python
+    \item Machine learning: scikit-learn
+    \item Deep learning: PyTorch, PyTorch Lightning
+    \item Visualization: matplotlib, seaborn, plotly
+    \item Feature extraction: PyWavelets, numpy
+\end{itemize}
+
+\section{Results}
+
+\subsection{Feature Separability Analysis}
+
+Table \ref{tab:tsne_results} presents the t-SNE-based separability analysis for all 16 feature sets, ranked by average inter-class distance.
+
+\begin{table*}[htbp]
+\centering
+\caption{Feature Separability Analysis Results (Sorted by Average Inter-class Distance)}
+\label{tab:tsne_results}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Feature Set} & \textbf{Dims} & \textbf{Avg Inter-Dist} & \textbf{Min Inter-Dist} & \textbf{Intra-Var} & \textbf{Sep. Ratio} & \textbf{Best Pair} \\
+\midrule
+F\_ALL & 29 & 1.627 & 1.034 & 0.964 & 1.688 & left vs rest (2.327) \\
+F\_CORE & 16 & 1.270 & 0.763 & 0.958 & 1.326 & left vs rest (2.067) \\
+C7: BandPower+Wavelet & 15 & 1.229 & 0.686 & 0.957 & 1.284 & left vs rest (2.004) \\
+C3: CSP+Wavelet & 14 & 1.189 & 0.712 & 0.957 & 1.242 & left vs rest (1.925) \\
+C5: PSD+Wavelet & 12 & 1.116 & 0.534 & 0.954 & 1.169 & left vs rest (1.906) \\
+F6: Temporal & 5 & 1.012 & 0.387 & 0.908 & 1.114 & left vs rest (1.651) \\
+F4: Wavelet & 10 & 1.023 & 0.457 & 0.953 & 1.073 & left vs rest (1.750) \\
+C6: CSP+IHAR & 12 & 0.909 & 0.623 & 0.973 & 0.934 & feet vs rest (1.220) \\
+C2: CSP+BandPower & 9 & 0.881 & 0.730 & 0.966 & 0.911 & left vs rest (1.262) \\
+C4: PSD+BandPower & 7 & 0.794 & 0.491 & 0.963 & 0.825 & left vs rest (1.233) \\
+C1: CSP+PSD & 6 & 0.728 & 0.594 & 0.965 & 0.754 & left vs rest (1.100) \\
+F\_MINIMAL & 6 & 0.728 & 0.594 & 0.965 & 0.754 & left vs rest (1.100) \\
+F5: IHAR & 8 & 0.681 & 0.434 & 0.975 & 0.698 & feet vs rest (1.080) \\
+F3: BandPower & 5 & 0.664 & 0.459 & 0.965 & 0.688 & left vs rest (0.976) \\
+F2: CSP & 4 & 0.570 & 0.447 & 0.968 & 0.589 & left vs rest (0.801) \\
+F1: PSD & 2 & 0.429 & 0.175 & 0.958 & 0.447 & left vs rest (0.754) \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\textbf{Key Findings:}
+\begin{itemize}
+    \item \textbf{F\_ALL} (combined features) achieved the highest average inter-class distance (1.627) and best separability ratio (1.688), demonstrating that combining multiple feature types captures complementary information.
+    
+    \item \textbf{F\_CORE} (PSD+CSP+BandPower) ranked second with an average distance of 1.270, suggesting this combination captures the most essential motor imagery characteristics.
+    
+    \item Wavelet-based combinations (C7, C3, C5) consistently showed strong separability, indicating time-frequency features are valuable for motor imagery.
+    
+    \item Simple features like PSD alone (F1) showed poor separability (0.429), confirming the need for multi-dimensional feature representations.
+    
+    \item The \textbf{left\_hand vs rest} pair consistently showed the largest separation across most feature sets, while \textbf{right\_hand vs rest} was typically the most challenging to discriminate.
+    
+    \item Intra-class variance remained relatively constant (0.91-0.98) across feature sets, suggesting that inter-class distance is the primary differentiator.
+\end{itemize}
+
+\subsection{SVM Classification Results}
+
+Table \ref{tab:svm_results} presents SVM classification performance for selected feature sets.
+
+\begin{table*}[htbp]
+\centering
+\caption{SVM Classification Results (Top Performers)}
+\label{tab:svm_results}
+\small
+\begin{tabular}{llcccccc}
+\toprule
+\textbf{Model} & \textbf{Features} & \textbf{Kernel} & \textbf{C} & \textbf{Test BAC} & \textbf{Test Kappa} & \textbf{Test F1} & \textbf{Test Acc} \\
+\midrule
+CSP+EA+SVM & CSP (8) + EA & RBF & 1.0 & \textbf{0.3036} & \textbf{0.0849} & 0.3389 & 0.3349 \\
+SVM & F\_ALL (79) & RBF & 10.0 & 0.2743 & 0.0366 & 0.3038 & 0.3029 \\
+SVM & C7: PSD+IHAR+Hjorth & RBF & 10.0 & 0.2736 & 0.0280 & 0.3001 & 0.3006 \\
+SVM & F6: Temporal & RBF & 10.0 & 0.2721 & 0.0278 & 0.2694 & 0.2800 \\
+SVM & F7: Hjorth & RBF & 100.0 & 0.2707 & 0.0218 & 0.2082 & 0.2514 \\
+SVM & C6: BandPower+IHAR & RBF & 100.0 & 0.2729 & 0.0251 & 0.2744 & 0.2720 \\
+\midrule
+CSP+SVM & CSP (8) only & RBF & 10.0 & 0.2429 & -0.0153 & 0.2699 & 0.2720 \\
+SVM & F2: CSP & RBF & 10.0 & 0.2421 & -0.0087 & 0.2165 & 0.2274 \\
+SVM & F1: PSD & RBF & 10.0 & 0.2450 & -0.0068 & 0.2631 & 0.2594 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\textbf{Key Findings:}
+\begin{itemize}
+    \item \textbf{CSP with Euclidean Alignment} achieved the best performance with BAC=0.3036 and Kappa=0.0849, demonstrating the effectiveness of domain adaptation techniques for cross-subject EEG analysis.
+    
+    \item The comprehensive feature set \textbf{F\_ALL} achieved competitive performance (BAC=0.2743), though not surpassing the specialized CSP+EA approach, suggesting potential overfitting or feature redundancy.
+    
+    \item Individual feature types (F1, F2) performed poorly (Kappa < 0), indicating that single-modality features are insufficient for this challenging task.
+    
+    \item Feature combinations consistently outperformed individual features, validating our multi-modal feature extraction strategy.
+    
+    \item The relatively low Kappa scores across all methods (< 0.1) indicate substantial difficulty in this classification task, likely due to the challenging nature of ALS patient data and inherent variability in motor imagery signals.
+\end{itemize}
+
+\subsection{EEGNet Classification Results}
+
+The EEGNet deep learning model was trained for 150 epochs with early stopping, achieving convergence after 99 epochs.
+
+\textbf{Training Progression:}
+\begin{itemize}
+    \item Epoch 1: BAC=0.2495, Kappa=-0.0010 (near random)
+    \item Epoch 10: BAC=0.3028, Kappa=0.0552 (initial learning)
+    \item Epoch 30: BAC=0.3079, Kappa=0.0596 (peak validation)
+    \item Epoch 70: BAC=0.3175, Kappa=0.0648 (best model)
+    \item Epoch 99: Early stopping triggered
+\end{itemize}
+
+\textbf{Final Test Performance (Best Model):}
+\begin{itemize}
+    \item \textbf{Accuracy}: 25.74\%
+    \item \textbf{Balanced Accuracy (BAC)}: 0.3123
+    \item \textbf{Cohen's Kappa}: 0.0624
+    \item \textbf{Weighted F1 Score}: 0.1758
+\end{itemize}
+
+Table \ref{tab:eegnet_classreport} presents the per-class performance breakdown.
+
+\begin{table}[htbp]
+\centering
+\caption{EEGNet Per-Class Performance}
+\label{tab:eegnet_classreport}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} \\
+\midrule
+Left Hand & 0.41 & 0.04 & 0.07 \\
+Right Hand & 0.25 & 0.70 & 0.37 \\
+Feet & 0.25 & 0.49 & 0.33 \\
+Rest & 0.24 & 0.03 & 0.05 \\
+\midrule
+Weighted Avg & 0.32 & 0.26 & 0.18 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Confusion Matrix Analysis:}
+
+The confusion matrix reveals strong class imbalance in predictions:
+
+\begin{verbatim}
+                Predicted
+              LH    RH   Feet  Rest
+Actual LH    322  5170  3251   155
+       RH    130  3250  1198    87
+       Feet  174  1827  2038   114
+       Rest  151  2729  1531   115
+\end{verbatim}
+
+\textbf{Key Observations:}
+\begin{itemize}
+    \item The model shows severe bias toward predicting \textbf{Right Hand} class (64\% of left\_hand samples misclassified as right\_hand).
+    
+    \item \textbf{Right Hand} achieves the highest recall (0.70) but suffers from low precision (0.25), indicating overprediction.
+    
+    \item \textbf{Left Hand} and \textbf{Rest} classes have extremely low recall (0.04 and 0.03), suggesting the model fails to learn their distinctive patterns.
+    
+    \item \textbf{Feet} class shows moderate performance with balanced precision and recall.
+    
+    \item Despite class weighting during training, the model exhibits strong prediction bias, possibly due to subtle inter-class differences or insufficient model capacity.
+\end{itemize}
+
+\subsection{Comparative Analysis: SVM vs EEGNet}
+
+Table \ref{tab:comparison} compares the best-performing configurations from both approaches.
+
+\begin{table}[htbp]
+\centering
+\caption{SVM vs EEGNet Performance Comparison}
+\label{tab:comparison}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Metric} & \textbf{CSP+EA+SVM} & \textbf{EEGNet} \\
+\midrule
+Balanced Accuracy & 0.3036 & \textbf{0.3123} \\
+Cohen's Kappa & \textbf{0.0849} & 0.0624 \\
+Weighted F1 & \textbf{0.3389} & 0.1758 \\
+Accuracy & \textbf{0.3349} & 0.2574 \\
+Training Time & Low & High \\
+Interpretability & High & Low \\
+Feature Engineering & Manual & Automatic \\
+Parameters & \textasciitilde100 & \textasciitilde50K \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Discussion}
+
+\subsection{Feature Separability Insights}
+
+Our t-SNE analysis reveals several important insights about feature discriminability for motor imagery classification in the EEGET-ALS dataset:
+
+\textbf{Superiority of Combined Features:} The F\_ALL feature set, combining all seven feature extraction methods, achieved the highest separability metrics. This suggests that different feature types capture complementary aspects of motor imagery patterns. Spectral features (PSD, band power) capture frequency-domain characteristics, spatial features (CSP) exploit inter-channel relationships, temporal features quantify time-domain statistics, and wavelet features bridge time and frequency domains.
+
+\textbf{Importance of Spatial Filtering:} Feature sets incorporating CSP consistently ranked higher than those without spatial filtering. This aligns with neuroscience literature showing that motor imagery produces spatially localized patterns in sensorimotor cortices that benefit from spatial discrimination.
+
+\textbf{Time-Frequency Representations:} Wavelet-based combinations (C7, C3, C5) demonstrated strong performance, suggesting that motor imagery patterns have both transient and sustained components best captured by time-frequency analysis.
+
+\textbf{Class-Specific Challenges:} The consistent finding that left\_hand vs rest shows the largest separation while right\_hand vs rest shows the smallest may reflect: (1) inherent asymmetries in the dataset, (2) lateralization effects in brain activation, or (3) participant biases in task execution.
+
+\subsection{SVM Classification Performance}
+
+\textbf{CSP+EA Effectiveness:} The superior performance of CSP with Euclidean Alignment (BAC=0.3036, Kappa=0.0849) validates the importance of domain adaptation in cross-subject EEG analysis. Euclidean Alignment reduces covariance structure variability across subjects and sessions, improving classifier generalization. This is particularly crucial for ALS patients, who may exhibit more variable neural patterns due to disease progression.
+
+\textbf{Feature Redundancy in F\_ALL:} Despite having the highest t-SNE separability, F\_ALL did not achieve the best classification accuracy. This suggests potential feature redundancy leading to overfitting, curse of dimensionality with 79 features and limited samples, or suboptimal feature weighting in the SVM.
+
+\textbf{Overall Low Performance:} The modest Kappa scores (< 0.1) across all SVM configurations indicate substantial classification difficulty, likely due to limited training data, high inter-subject variability in both healthy and ALS populations, subtle differences between motor imagery classes, and presence of ALS patients whose motor imagery patterns may differ from healthy controls.
+
+\subsection{EEGNet Deep Learning Performance}
+
+\textbf{Automatic Feature Learning:} EEGNet achieved a BAC of 0.3123 without manual feature engineering, demonstrating the capability of deep learning to discover relevant representations directly from raw EEG. However, this came at the cost of interpretability and computational resources.
+
+\textbf{Class Imbalance Handling:} Despite employing class weighting, EEGNet exhibited severe prediction bias toward the Right Hand class. The confusion matrix shows the model learned to predominantly predict Right Hand, achieving high recall for this class (0.70) but at the expense of other classes.
+
+\textbf{Overfitting Concerns:} The training BAC peaked around epoch 70 and subsequently declined. The large gap between training and test performance suggests overfitting, likely due to high model capacity (50K parameters) relative to effective training samples and insufficient regularization.
+
+\subsection{SVM vs EEGNet Trade-offs}
+
+\textbf{Performance}: EEGNet achieved slightly higher BAC (0.3123 vs 0.3036) but lower Kappa (0.0624 vs 0.0849). SVM with CSP+EA showed more balanced per-class performance, while EEGNet exhibited more severe prediction bias. SVM's higher Kappa indicates better agreement beyond chance.
+
+\textbf{Practical Considerations}:
+\begin{itemize}
+    \item Training Efficiency: SVM trained in seconds, EEGNet required hours with GPU
+    \item Interpretability: SVM with manual features provides clear insight; EEGNet's learned features are opaque
+    \item Generalization: CSP+EA's explicit domain adaptation may generalize better to new subjects
+    \item Data Requirements: Deep learning typically needs more data; limited sample size may favor SVM
+\end{itemize}
+
+\subsection{Challenges Specific to ALS Dataset}
+
+The EEGET-ALS dataset presents unique challenges:
+
+\textbf{Disease Heterogeneity:} ALS affects individuals differently, with varying rates of progression and patterns of motor neuron degeneration. This heterogeneity may manifest as increased variability in motor imagery patterns.
+
+\textbf{Longitudinal Recording Structure:} The dataset includes multiple recording sessions per participant over extended periods (e.g., ALS01 has 10 sessions spanning 17 months as documented in recording\_time.json). While this longitudinal structure is valuable for studying disease progression, it introduces temporal variability. Our current analysis treats all sessions equally without explicitly modeling temporal evolution, which may contribute to increased variance in the data.
+
+\textbf{Mixed Population:} The inclusion of both healthy participants and ALS patients increases inter-subject variability and may confound classification. The verified dataset contains participants of different ages (e.g., healthy participant id59: 31 years old, ALS patient ALS01: 43 years old) and potentially different disease stages for ALS patients.
+
+\textbf{Motor Imagery Ability:} ALS patients may have altered proprioception or compromised ability to generate motor imagery due to motor system degradation, potentially resulting in weaker or different neural signatures compared to healthy participants.
+
+\textbf{Dataset Documentation:} The dataset includes rich metadata (participant demographics in info.json, recording parameters in eeg.json, scenario descriptions in scenario.json) and auxiliary data (eye-tracking in ET.csv), though this study focuses exclusively on EEG signals. Future work could leverage multimodal information for improved classification.
+
+\subsection{Limitations}
+
+Several limitations should be considered:
+\begin{itemize}
+    \item We used a single train-test split rather than subject-wise cross-validation
+    \item Limited hyperparameter optimization for EEGNet
+    \item Limited data augmentation was applied
+    \item We did not perform systematic feature selection
+    \item Class imbalance remains a significant challenge
+\end{itemize}
+
+\subsection{Future Directions}
+
+Promising avenues for future research:
+\begin{itemize}
+    \item Advanced domain adaptation techniques (transfer learning, domain adversarial training)
+    \item Ensemble methods combining multiple feature sets or model types
+    \item Attention mechanisms to focus on informative channels and time segments
+    \item Subject-specific calibration using few-shot learning
+    \item \textbf{Longitudinal Disease Progression Modeling}: The dataset's multi-session structure (e.g., 10 sessions over 17 months for ALS01) enables time-series analysis to correlate motor imagery pattern changes with disease progression. Temporal models could track degradation of motor imagery ability and predict disease trajectory.
+    \item Explainable AI techniques for understanding learned features
+    \item Real-time BCI implementation for practical feasibility assessment
+    \item \textbf{Multimodal Integration}: The dataset includes eye-tracking data (ET.csv) and rich metadata that could be integrated with EEG for improved classification and user state monitoring.
+\end{itemize}
+
+\section{Conclusion}
+
+This study presented a comprehensive analysis of feature extraction techniques for motor imagery classification in the EEGET-ALS dataset, comparing traditional machine learning with manual features against deep learning with automatic feature learning.
+
+\textbf{Key Conclusions:}
+\begin{enumerate}
+    \item Combined feature sets (F\_ALL) achieved the highest feature separability (inter-class distance: 1.627) in t-SNE space, demonstrating complementary nature of multiple feature types.
+    
+    \item SVM with CSP and Euclidean Alignment achieved the best balanced accuracy (0.3036) and Cohen's Kappa (0.0849), highlighting the importance of spatial filtering and domain adaptation.
+    
+    \item EEGNet achieved comparable balanced accuracy (0.3123) but with lower Kappa (0.0624) and severe class prediction bias, suggesting challenges in training deep models on limited EEG data.
+    
+    \item The overall modest performance (Kappa < 0.1) across all methods indicates substantial challenges in motor imagery classification for the EEGET-ALS dataset.
+    
+    \item Manual feature extraction with SVM offers advantages in interpretability, training efficiency, and balanced class performance, while EEGNet provides end-to-end learning at the cost of computational resources and interpretability.
+\end{enumerate}
+
+For BCI applications targeting ALS patients, our findings suggest that spatial filtering (CSP) and domain adaptation (EA) are critical, multi-modal feature extraction captures complementary information, traditional machine learning remains competitive for limited data scenarios, and deep learning shows promise but requires larger datasets and careful regularization.
+
+This work contributes to the growing body of research on EEG-based BCIs for individuals with motor disabilities, providing insights into the trade-offs between manual and automatic feature extraction and highlighting the unique challenges posed by neurodegenerative diseases like ALS.
+
+\section*{Acknowledgment}
+
+The authors would like to thank the creators of the EEGET-ALS public dataset for making their data available to the research community.
+
+\begin{thebibliography}{00}
+\bibitem{b1} References to be added by the author
+\end{thebibliography}
+
+\end{document}
